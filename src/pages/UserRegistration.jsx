@@ -9,6 +9,8 @@ function UserRegistration() {
     contact: '',
     role: '',
   })
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -17,27 +19,30 @@ function UserRegistration() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    setMessage('')
+    setError('')
 
     try {
       const response = await axios.post('http://localhost:8001/user/add', registrationData)
 
       if (response.status === 201) {
         console.log('Registration successful:', response.data)
-        alert('Registration successful')
+        setError('')
+        setMessage('Registration Success')
       } else {
         console.error('Registration failed:', response)
-        alert('Registration failed')
+        setMessage('')
+        setError('Registration Failed')
       }
     } catch (error) {
-      if (error.response) {
-        console.error('Error in response:', error.response.data)
-        alert(error.response.data?.message || 'Error in response')
+      setMessage('')
+
+      if (error.response?.status === 500) {
+        setError('Internal Server Error - Failed to Register')
       } else if (error.request) {
-        console.error('Error in request:', error.request)
-        alert('Error in request')
+        setError('Network Error - Server not responding')
       } else {
-        console.error('Error:', error.message)
-        alert('Something went wrong')
+        setError('Bad Request - Check your input')
       }
     }
   }
@@ -46,6 +51,11 @@ function UserRegistration() {
     <section className="form-page">
       <form className="auth-form" onSubmit={handleSubmit}>
         <div>
+          {message ? (
+            <p style={{ color: 'green' }}>{message}</p>
+          ) : error ? (
+            <p style={{ color: 'red' }}>{error}</p>
+          ) : null}
           <p className="eyebrow">New account</p>
           <h1>Register</h1>
           <p className="form-description">Enter your details to create an account.</p>

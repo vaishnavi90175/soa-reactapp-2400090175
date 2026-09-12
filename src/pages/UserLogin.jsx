@@ -29,18 +29,16 @@ function UserLogin() {
         setError('Login Failed')
       }
     } catch (error) {
-      if (error.response) {
-        console.error('Error in response:', error.response.data)
-        setMessage('')
-        setError(error.response.data?.message || 'Error in response')
+      setMessage('')
+
+      if (error.response?.status === 401) {
+        setError(error.response.data?.message || error.response.data || 'Invalid email or password')
+      } else if (error.response?.status === 500) {
+        setError('Internal Server Error')
       } else if (error.request) {
-        console.error('Error in request:', error.request)
-        setMessage('')
-        setError('Error in request')
+        setError('Network Error - Server not responding')
       } else {
-        console.error('Error:', error.message)
-        setMessage('')
-        setError('Something went wrong')
+        setError('Bad Request - Check your input')
       }
     }
   }
